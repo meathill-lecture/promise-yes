@@ -1,0 +1,30 @@
+{
+  "name": "promise-yes",
+  "version": "1.0.0",
+  "description": "something you should konw about promise",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch:stylus": "stylus -w styl/screen.styl -o css/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/meathill-lecture/promise-yes.git"
+  },
+  "keywords": [
+    "lecture",
+    "promise",
+    "javascript"
+  ],
+  "author": "Meathill <meathill@gmail.com>",
+  "license": "MIT + CC4.0",
+  "bugs": {
+    "url": "https://github.com/meathill-lecture/promise-yes/issues"
+  },
+  "homepage": "https://meathill-lecture.github.io/promise-yes/",
+  "devDependencies": {
+    "font-awesome": "^4.7.0",
+    "highlight.js": "^9.10.0",
+    "reveal.js": "^3.4.1"
+  }
+}
