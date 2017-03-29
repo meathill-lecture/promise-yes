@@ -1,2 +1,8 @@
+# IDE
+.idea
+
 # repo
 node_modules
+
+# build
+/css

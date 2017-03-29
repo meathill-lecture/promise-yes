@@ -2,6 +2,12 @@
 
 <!-- page -->
 
+> ['prɒmɪs]
+
+> n. 许诺，允诺；希望
+
+<!-- page -->
+
 > The Promise object is used for asynchronous computations.
 
 > A Promise represents a value which may be available now, or in the future, or never.
@@ -41,7 +47,7 @@ Note:
 
 <!-- section -->
 
-终于，开发者们踏入“回调地狱”。
+稍有不慎，就会踏入“回调地狱”。
 
 ![callback hell](./img/callback-hell.jpg)
 
@@ -53,49 +59,34 @@ Note:
 
 <!-- section -->
 ```javascript
-function search(dir, keyword, callback) {
-  fs.readdir(dir, function (err, files) { // [1]
+function findLargest(dir, callback) {
+  fs.readdir(dir, function (err, files) {
     if (err) return callback(err);
-    var errored = false;
-    var results = [];
-    files.forEach(function (file, index) { // [2]
-      fs.stat(path.join(dir, file), function (err, stat) { // [3]
-        if (errored) return;
+    let errored = false;
+    let stats = [];
+    files.forEach( file => {
+      fs.stat(path.join(dir, file), (err, stat) => { // [1]
+        if (errored) return; // [2]
         if (err) {
           errored = true;
           return callback(err);
         }
-        if (stat.isDirectory()) {
-          return;
-        }
-        fs.readFile(path.join(dir, file), 'utf8', function (err, content) {
-                    // [4]
-          if (err) {
-            errored = true;
-            return callback(err);
-          }
-          if (content.indexOf(keyword) === -1) {
-            return;
-          }
-          var lines = content.match(/.*keyword.*/g);
-          fs.writeFile(path.join(dir, file + '.result'),
-                        lines.join('\s'), 'utf8', function (err) { // [5]
-            if (err) {
-              errored = true;
-              return callback(err);
-            }
-            results.push(file);
-          });
-        });
+        stats.push(stat); // [3]
       });
     });
-    callback(results);
-  });
+    let largest = stats
+      .filter(function (stat) { return stat.isFile(); })
+      .reduce(function (prev, next) {
+        if (prev.size > next.size) return prev;
+        return next;
+      });
+    callback(null, files[stats.indexOf(largest)]);
+  })
 }
 
-search('some/path/', 'meathill', function (err, files) {
-  if (err) throw err;
-  console.log(files);
+findLargest('./path/to/dir', function (err, filename) {
+  if (err) return console.error(err);
+  console.log('largest file was:', filename);
 });
 ```
 
@@ -104,12 +95,12 @@ search('some/path/', 'meathill', function (err, files) {
 回调有三个问题：
 
 1. 嵌套层次很深，难以维护
-2. 无法使用 `return` 和 `throw`
+2. 无法正常使用 `return` 和 `throw`
 3. 无法正常检索堆栈信息
 
 <!-- page -->
 
-社区经过长时间探索，最终得出：
+社区经过长时间探索，最终总结出：
 
 ## Promise
 
@@ -137,33 +128,163 @@ new Promise(
   .then( function () {
     // 成功，下一步
   }, function () {
-    // 失败，处理
+    // 失败，做相应处理
   });
 ```
 
 Note:
-正所谓“我不入地狱谁入地狱”，Promise 正是用回调解决了回调……
+正所谓“我不入地狱谁入地狱”，Promise 使用回调解决了回调……
 
 <!-- section -->
 
 1. Promise 是一个 **代理对象**，它和原先的操作并无关系。
 2. Promise 有3个状态：
-    1. `pending` 初始状态
-    2. `fulfilled` 操作成功
-    3. `rejected` 操作失败
-3. Promise 状态发生改变的时候，就会执行 `.then()` 里的回调
-
-<!-- page -->
-
-接下来，我们由易到难，讲授如何使用 Promise。
+    1. `pending` [待定] 初始状态
+    2. `fulfilled` [实现] 操作成功
+    3. `rejected` [被否决] 操作失败
+3. Promise 一经创建，立即执行。
+4. Promise 状态发生改变的时候，就会执行 `.then()` 里的回调。
 
 <!-- section -->
+
+接下来，看一个简单的范例
 
 ### 定时执行
 
 <!-- ./sample/timeout.js -->
 
+<!-- page -->
+
+再看一个两步执行完的范例
+
+### 两次定时执行
+
+<!-- ./sample/timeout2.js -->
+
+<!-- page -->
+
+假如在 `.then()` 的函数里面不返回新的 Promise，会怎样？
+
+<!-- ./sample/timeout3.js -->
+
+<!-- page -->
+
+## `.then()`
+
+1. `.then()`接受一个或两个函数作为参数
+2. 当前面的 Promise 状态改变时，根据最终状态，选择执行
+3. `fulfilled` 函数可以返回新的 Promise，或其它值
+4. 如果返回新的 Promise，那么下一级 `.then()` 会在其完成之后执行
+5. 如果返回其它任何值，则会继续执行下一级 `.then()`
+
+Note:
+1. (我建议只传一个，错误处理用 `.catch()`)
+
+<!-- page -->
+
+问题：下面的四种 promises 的区别是什么
+
+```javascript
+// #1
+doSomething().then(function () {
+  return doSomethingElse();
+});
+
+// #2
+doSomething().then(function () {
+  doSomethingElse();
+});
+
+// #3
+doSomething().then(doSomethingElse());
+
+// #4
+doSomething().then(doSomethingElse);
+```
+
+<!-- page -->
+
+```javascript
+doSomething()
+  .then(function () {
+    return doSomethingElse();
+  });
+```
+
+答案：
+
+```
+doSomething
+|-----------|
+            doSomethingElse(undefined)
+            |------------|
+                         finalHandler(resultOfDoSomethingElse)
+                         |------------|
+```
+
 <!-- section -->
+
+```javascript
+doSomething()
+  .then(function () {
+    doSomethingElse();
+  })
+  .then(finalHandler);
+```
+
+答案：
+
+```
+doSomething
+|-----------------|
+                  doSomethingElse(undefined)
+                  |------------------|
+                  finalHandler(undefined)
+                  |------------------|
+```
+
+<!-- section -->
+```javascript
+doSomething()
+  .then(doSomethingElse())
+  .then(finalHandler);
+```
+
+答案：
+
+```
+doSomething
+|-----------------|
+doSomethingElse(undefined)
+|---------------------------------|
+                  finalHandler(resultOfDoSomething)
+                  |------------------|
+```
+
+<!-- section -->
+
+```javascript
+doSomething()
+  .then(doSomethingElse)
+  .then(finalHandler);
+```
+
+答案：
+
+```
+doSomething
+|-----------|
+            doSomethingElse(resultOfDoSomething)
+            |------------|
+                         finalHandler(resultOfDoSomethingElse)
+                         |------------------|
+```
+
+<!-- section -->
+
+注：以上4道题及答案均来自 [We have a problem with promises](https://pouchdb.com/2015/05/18/we-have-a-problem-with-promises.html)
+
+<!-- page -->
 
 ### 远程加载
 
@@ -256,8 +377,21 @@ search('some/path/', 'meathill')
 
 <!-- page -->
 
-### Promise 的支持情况
+## Promise 的支持情况
 
 ![caniuse](./img/caniuse.jpg)
 
 放手用吧，少年！
+
+<!-- page -->
+
+Q&A
+
+<!-- page -->
+
+#### 参考：
+
+* [MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)
+* [MDN 中文](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise)
+* [阮一峰：ECMAScript 6 入门 - Promise 对象](http://es6.ruanyifeng.com/#docs/promise)
+* [[翻译] We have a problem with promises](http://fex.baidu.com/blog/2015/07/we-have-a-problem-with-promises/)
