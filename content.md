@@ -144,6 +144,7 @@ Note:
     3. `rejected` [被否决] 操作失败
 3. Promise 一经创建，立即执行。
 4. Promise 状态发生改变的时候，就会执行 `.then()` 里的回调。
+5. Promise 的状态一经改变，不会再变。
 
 <!-- section -->
 
@@ -286,7 +287,65 @@ doSomething
 
 <!-- page -->
 
-### 远程加载
+## 错误处理
+
+<!-- ./sample/error.js -->
+<!-- ./sample/error-reject.js -->
+
+<!-- section -->
+
+Promise 会自动捕获内部异常，并交给 `reject` 函数处理。
+
+我们通常有两种做法：
+
+1. `reject('错误信息')`<br>`.then(null, message => {})`
+2. `throw new Error('错误信息')`<br>`.catch( message => {})`
+
+我推荐使用第二种，更加清晰，更加好读，并且可以捕获前面的错误。
+
+<!-- section -->
+
+<i class="fa fa-warning"></i> 注意：强烈建议在所有队列最后都加上 `.catch()`，以避免漏掉错误处理造成意想不到的问题。
+
+<!-- section -->
+
+### `.catch()` 与 `.then()` 混用
+
+<!-- page -->
+
+## 把回调包装成 Promise
+
+<!-- page -->
+
+## `forEach`
+
+<!-- section -->
+
+### 进阶：使用 Generator 遍历 
+
+<!-- page -->
+
+## `Promise.all()`
+
+<!-- page -->
+
+## 实现队列
+
+<!-- page -->
+
+## `Promise.resolve()`
+
+<!-- section -->
+
+## `Promise.reject()`
+
+<!-- page -->
+
+## `Promise.race()`
+
+<!-- page -->
+
+## jQuery
 
 jQuery 已经实现了 Promise。参见 [jqXHR](http://api.jquery.com/jQuery.ajax/#jqXHR)
 
@@ -301,9 +360,9 @@ $.ajax(url, {
 
 <!-- section -->
 
-### 读取本地文件
+### jQuery.defered
 
-<!-- section -->
+<!-- page -->
 
 我们来用 Promise 改造一下前面的例子。
 
@@ -385,7 +444,7 @@ search('some/path/', 'meathill')
 
 <!-- page -->
 
-Q&A
+## Q&A
 
 <!-- page -->
 

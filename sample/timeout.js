@@ -2,7 +2,7 @@ console.log('here we go');
 new Promise( resolve => {
   setTimeout( () => {
     resolve('hello');
-  }, 5000);
+  }, 2000);
 })
   .then( value => {
     console.log( value + ' world');
