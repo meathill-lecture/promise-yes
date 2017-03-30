@@ -7,10 +7,10 @@ const fs = require('fs');
 
 module.exports = {
   read: function (path, options) {
-    return new Promise((resolve, reject) => {
+    return new Promise( resolve => {
       fs.readFile(path, options, (err, content) => {
         if (err) {
-          return reject(err);
+          throw err;
         }
         resolve(content);
       });

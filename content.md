@@ -1,5 +1,7 @@
 # Promise? <br>Promise.
 
+[@meathill](https://weibo.com/meathill)
+
 <!-- page -->
 
 > ['prɒmɪs]
@@ -29,17 +31,21 @@
 Promise 对象
 
 * 用于异步计算。
-* 它代表一个值，
+* 代表一个值，
 * 这个值可能现在就可以用；
-* 也可能将来才可以用（正在加载）;
-* 甚至永远不会存在（但不耽误我们写别的）。
+* 也可能将来才可以用;
+* 甚至永远不会存在。
+
+Note:
+4. （正在加载）
+5. （但不耽误我们写别的）
 
 <!-- page -->
 
 ## 为什么会有 Promise？
 
 1. JavaScript 为检查表单而生
-2. 接下来它可以操作 DOM
+2. 创造它的首要目标是操作 DOM
 3. JS 的操作大多是异步的
 4. 无阻塞成为 JS 的特色
 
@@ -63,28 +69,28 @@ Note:
 function findLargest(dir, callback) {
   fs.readdir(dir, function (err, files) {
     if (err) return callback(err);
-    let count = files.length;
+    let count = files.length; // [1]
     let errored = false;
     let stats = [];
     files.forEach( file => {
-      fs.stat(path.join(dir, file), (err, stat) => { // [1]
-        if (errored) return; // [2]
+      if (errored) return; // [2]
+      fs.stat(path.join(dir, file), (err, stat) => {
         if (err) {
           errored = true;
           return callback(err);
         }
         stats.push(stat); // [3]
-      });
-      
-      if (--count === 0) {
-        let largest = stats
-          .filter(function (stat) { return stat.isFile(); })
-          .reduce(function (prev, next) {
-            if (prev.size > next.size) return prev;
-            return next;
-          });
-        callback(null, files[stats.indexOf(largest)]);
-      }
+        
+        if (--count === 0) { // [4]
+          let largest = stats
+            .filter(function (stat) { return stat.isFile(); })
+            .reduce(function (prev, next) {
+              if (prev.size > next.size) return prev;
+              return next;
+            });
+          callback(null, files[stats.indexOf(largest)]);
+        }
+      });      
     });    
   });
 }
@@ -111,7 +117,7 @@ findLargest('./path/to/dir', function (err, filename) {
 
 1. 可以很好的解决回调嵌套问题
 2. 代码阅读体验很好
-3. 不需要增加新的语法
+3. 不需要新的语言特性
 
 <!-- page -->
 
@@ -130,7 +136,7 @@ new Promise(
     reject();
   }
 )
-  .then( function () {
+  .then(function () {
     // 成功，下一步
   }, function () {
     // 失败，做相应处理
@@ -147,8 +153,8 @@ Note:
     1. `pending` [待定] 初始状态
     2. `fulfilled` [实现] 操作成功
     3. `rejected` [被否决] 操作失败
-3. Promise 一经创建，立即执行。
-4. Promise 状态发生改变的时候，就会执行 `.then()` 里的回调。
+3. Promise 实例一经创建，立即执行。
+4. Promise 状态发生改变的时候，就会触发 `.then()` 执行后续步骤。
 5. Promise 的状态一经改变，不会再变。
 
 <!-- section -->
@@ -164,7 +170,7 @@ Note:
 
 <!-- page -->
 
-再看一个两步执行完的范例
+再看一个分两步执行的范例
 
 ### 两次定时执行
 
@@ -184,11 +190,11 @@ Note:
 
 ## `.then()`
 
-1. `.then()`接受一个或两个函数作为参数
-2. 当前面的 Promise 状态改变时，根据最终状态，选择执行
-3. `fulfilled` 函数可以返回新的 Promise，或其它值
-4. 如果返回新的 Promise，那么下一级 `.then()` 会在其完成之后执行
-5. 如果返回其它任何值，则会继续执行下一级 `.then()`
+1. `.then()`接受两个函数作为参数，分别代表 `fulfilled` 和 `rejected`
+2. 当前面的 Promise 状态改变时，根据其最终状态，选择一个来执行
+3. 状态响应函数可以返回新的 Promise，或其它值
+4. 如果返回新的 Promise，那么下一级 `.then()` 会在新 Promise 状态改变之后执行
+5. 如果返回其它任何值，则会立刻继续执行下一级 `.then()`
 
 Note:
 1. (我建议只传一个，错误处理用 `.catch()`)
@@ -357,7 +363,7 @@ doSomething()
 1. 它接受一个数组作为参数
 2. 数组里可以是 Promise 对象，也可以是别的值，只有 Promise 会等待状态改变
 3. 当所有子 Promise 都完成，该 Promise 完成，返回值是全部值的数组
-4. 有任何一个失败，该 Promise 失败，返回值是第一个失败的结果
+4. 有任何一个失败，该 Promise 失败，返回值是第一个失败的子 Promise 的结果
 
 ```
 ./sample/all.js
@@ -387,7 +393,7 @@ doSomething()
 
 ## `Promise.reject()`
 
-<!-- page -->
+<!-- section -->
 
 ## `Promise.race()`
 
@@ -409,6 +415,10 @@ $.ajax(url, {
 <!-- section -->
 
 ### jQuery.defered
+
+<!-- section -->
+
+### fetch API
 
 <!-- page -->
 

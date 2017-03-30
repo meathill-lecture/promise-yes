@@ -7,6 +7,15 @@ new Promise( resolve => {
   .then( value => {
     console.log(value);
     console.log('everyone');
+    (function () {
+      return new Promise(resolve => {
+        setTimeout(() => {
+          console.log('Mr.Laurence');
+          resolve('Merry Xmas');
+        }, 2000);
+      });
+    }());
+    return false;
   })
   .then( value => {
     console.log( value + ' world');

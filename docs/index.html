@@ -15,6 +15,7 @@
     <div class="reveal">
       <div class="slides">
         <section><h1 id="promise-br-promise-">Promise? <br>Promise.</h1>
+<p><a href="https://weibo.com/meathill">@meathill</a></p>
 </section><section><blockquote>
 <p>[&#39;prɒmɪs]</p>
 <p>n. 许诺，允诺；希望</p>
@@ -35,15 +36,15 @@
 </section></section><section><p>Promise 对象</p>
 <ul>
 <li>用于异步计算。</li>
-<li>它代表一个值，</li>
+<li>代表一个值，</li>
 <li>这个值可能现在就可以用；</li>
-<li>也可能将来才可以用（正在加载）;</li>
-<li>甚至永远不会存在（但不耽误我们写别的）。</li>
+<li>也可能将来才可以用;</li>
+<li>甚至永远不会存在。</li>
 </ul>
 </section><section><section><h2 id="-promise-">为什么会有 Promise？</h2>
 <ol>
 <li>JavaScript 为检查表单而生</li>
-<li>接下来它可以操作 DOM</li>
+<li>创造它的首要目标是操作 DOM</li>
 <li>JS 的操作大多是异步的</li>
 <li>无阻塞成为 JS 的特色</li>
 </ol>
@@ -54,28 +55,28 @@
 </section><section><pre><code class="lang-javascript">function findLargest(dir, callback) {
   fs.readdir(dir, function (err, files) {
     if (err) return callback(err);
-    let count = files.length;
+    let count = files.length; // [1]
     let errored = false;
     let stats = [];
     files.forEach( file =&gt; {
-      fs.stat(path.join(dir, file), (err, stat) =&gt; { // [1]
-        if (errored) return; // [2]
+      if (errored) return; // [2]
+      fs.stat(path.join(dir, file), (err, stat) =&gt; {
         if (err) {
           errored = true;
           return callback(err);
         }
         stats.push(stat); // [3]
-      });
 
-      if (--count === 0) {
-        let largest = stats
-              .filter(function (stat) { return stat.isFile(); })
-              .reduce(function (prev, next) {
-                if (prev.size &gt; next.size) return prev;
-                return next;
-              });
-        callback(null, files[stats.indexOf(largest)]);
-      }
+        if (--count === 0) { // [4]
+          let largest = stats
+            .filter(function (stat) { return stat.isFile(); })
+            .reduce(function (prev, next) {
+              if (prev.size &gt; next.size) return prev;
+              return next;
+            });
+          callback(null, files[stats.indexOf(largest)]);
+        }
+      });      
     });    
   });
 }
@@ -96,7 +97,7 @@ findLargest(&#39;./path/to/dir&#39;, function (err, filename) {
 <ol>
 <li>可以很好的解决回调嵌套问题</li>
 <li>代码阅读体验很好</li>
-<li>不需要增加新的语法</li>
+<li>不需要新的语言特性</li>
 </ol>
 </section><section><section><h2 id="promise-">Promise 详解</h2>
 </section><section><pre><code class="lang-javascript">new Promise(
@@ -109,7 +110,7 @@ findLargest(&#39;./path/to/dir&#39;, function (err, filename) {
     reject();
   }
 )
-  .then( function () {
+  .then(function () {
     // 成功，下一步
   }, function () {
     // 失败，做相应处理
@@ -123,25 +124,25 @@ findLargest(&#39;./path/to/dir&#39;, function (err, filename) {
 <li><code>rejected</code> [被否决] 操作失败</li>
 </ol>
 </li>
-<li>Promise 一经创建，立即执行。</li>
-<li>Promise 状态发生改变的时候，就会执行 <code>.then()</code> 里的回调。</li>
+<li>Promise 实例一经创建，立即执行。</li>
+<li>Promise 状态发生改变的时候，就会触发 <code>.then()</code> 执行后续步骤。</li>
 <li>Promise 的状态一经改变，不会再变。</li>
 </ol>
 </section><section><p>接下来，看一个简单的范例</p>
 <h3 id="-">定时执行</h3>
-<!-- ./sample/timeout.js -->
-</section></section><section><p>再看一个两步执行完的范例</p>
+<pre><code>./sample/timeout.js
+</code></pre></section></section><section><p>再看一个分两步执行的范例</p>
 <h3 id="-">两次定时执行</h3>
-<!-- ./sample/timeout2.js -->
-</section><section><p>假如在 <code>.then()</code> 的函数里面不返回新的 Promise，会怎样？</p>
-<!-- ./sample/timeout3.js -->
-</section><section><h2 id="-then-"><code>.then()</code></h2>
+<pre><code>./sample/timeout2.js
+</code></pre></section><section><p>假如在 <code>.then()</code> 的函数里面不返回新的 Promise，会怎样？</p>
+<pre><code>./sample/timeout3.js
+</code></pre></section><section><h2 id="-then-"><code>.then()</code></h2>
 <ol>
-<li><code>.then()</code>接受一个或两个函数作为参数</li>
-<li>当前面的 Promise 状态改变时，根据最终状态，选择执行</li>
-<li><code>fulfilled</code> 函数可以返回新的 Promise，或其它值</li>
-<li>如果返回新的 Promise，那么下一级 <code>.then()</code> 会在其完成之后执行</li>
-<li>如果返回其它任何值，则会继续执行下一级 <code>.then()</code></li>
+<li><code>.then()</code>接受两个函数作为参数，分别代表 <code>fulfilled</code> 和 <code>rejected</code></li>
+<li>当前面的 Promise 状态改变时，根据其最终状态，选择一个来执行</li>
+<li>状态响应函数可以返回新的 Promise，或其它值</li>
+<li>如果返回新的 Promise，那么下一级 <code>.then()</code> 会在新 Promise 状态改变之后执行</li>
+<li>如果返回其它任何值，则会立刻继续执行下一级 <code>.then()</code></li>
 </ol>
 </section><section><p>问题：下面的四种 promises 的区别是什么</p>
 <pre><code class="lang-javascript">// #1
@@ -218,17 +219,36 @@ doSomethingElse(undefined)
 <li><code>throw new Error(&#39;错误信息&#39;)</code><br><code>.catch( message =&gt; {})</code></li>
 </ol>
 <p>我推荐使用第二种，更加清晰，更加好读，并且可以捕获前面的错误。</p>
-</section><section><p><i class="fa fa-warning"></i> 注意：强烈建议在所有队列最后都加上 <code>.catch()</code>，以避免漏掉错误处理造成意想不到的问题。</p>
 </section><section><h3 id="-catch-then-"><code>.catch()</code> 与 <code>.then()</code> 混用</h3>
+<pre><code>./sample/catch-then.js
+</code></pre></section><section><p><i class="fa fa-warning"></i> 注意：强烈建议在所有队列最后都加上 <code>.catch()</code>，以避免漏掉错误处理造成意想不到的问题。</p>
+<pre><code class="lang-javascript">doSomething()
+  .doAnotherThing()
+  .doMoreThing()
+  .catch( err =&gt; {
+    console.log(err);
+  });
+</code></pre>
 </section></section><section><h2 id="-promise">把回调包装成 Promise</h2>
-</section><section><section><h2 id="-foreach-"><code>forEach</code></h2>
+<pre><code>./sample/wrap.js
+</code></pre></section><section><section><h2 id="-">批量执行</h2>
+<p><code>Promise.all()</code></p>
+</section><section><p><code>Promise.all([p1, p2, p3, ....])</code> 用于将多个 Promise 实例，包装成一个新的 Promise 实例。</p>
+<ol>
+<li>它接受一个数组作为参数</li>
+<li>数组里可以是 Promise 对象，也可以是别的值，只有 Promise 会等待状态改变</li>
+<li>当所有子 Promise 都完成，该 Promise 完成，返回值是全部值的数组</li>
+<li>有任何一个失败，该 Promise 失败，返回值是第一个失败的子 Promise 的结果</li>
+</ol>
+<pre><code>./sample/all.js
+</code></pre></section></section><section><p><code>.map()</code></p>
+<pre><code>./sample/map.js
+</code></pre></section><section><section><h2 id="-">实现队列</h2>
 </section><section><h3 id="-generator-">进阶：使用 Generator 遍历</h3>
-</section></section><section><h2 id="-promise-all-"><code>Promise.all()</code></h2>
-</section><section><h2 id="-">实现队列</h2>
-</section><section><section><h2 id="-promise-resolve-"><code>Promise.resolve()</code></h2>
+</section></section><section><section><h2 id="-promise-resolve-"><code>Promise.resolve()</code></h2>
 </section><section><h2 id="-promise-reject-"><code>Promise.reject()</code></h2>
-</section></section><section><h2 id="-promise-race-"><code>Promise.race()</code></h2>
-</section><section><section><h2 id="jquery">jQuery</h2>
+</section><section><h2 id="-promise-race-"><code>Promise.race()</code></h2>
+</section></section><section><section><h2 id="jquery">jQuery</h2>
 <p>jQuery 已经实现了 Promise。参见 <a href="http://api.jquery.com/jQuery.ajax/#jqXHR">jqXHR</a></p>
 <pre><code class="lang-javascript">$.ajax(url, {
   dataType: &#39;json&#39;
@@ -238,8 +258,9 @@ doSomethingElse(undefined)
   });
 </code></pre>
 </section><section><h3 id="jquery-defered">jQuery.defered</h3>
+</section><section><h3 id="fetch-api">fetch API</h3>
 </section></section><section><section><p>我们来用 Promise 改造一下前面的例子。</p>
-</section><section><pre><code class="lang-javascript">function search(dir, keyword, callback) {
+</section><section><pre><code class="lang-javascript">function search(dir) {
   return new Promise( resolve =&gt; {
     fs.readdir(dir, function (err, files) {
       if (err) throw err;
@@ -249,53 +270,32 @@ doSomethingElse(undefined)
     .then( files =&gt; {
       return Promise.all( files.map( file =&gt; {
         return new Promise(resolve =&gt; {
-          fs.stat(path.join(dir, file), function (err, stat) {
+          fs.stat(path.join(dir, file), (err, stat) =&gt; {
             if (err) throw err;
             if (stat.isDirectory()) {
-              throw new Error(&#39;Not File&#39;);
+              return resolve({
+                size: 0
+              });
             }
+            stat.file = file;
             resolve(stat);
           });
-        })
-          .then( stat =&gt; {
-            return new Promise(resolve =&gt; {
-              fs.readFile(path.join(dir, file), &#39;utf8&#39;, function (err, content) {
-                if (err) throw err;
-                if (content.indexOf(keyword) === -1) {
-                  throw new Error(&#39;No keyword&#39;);
-                }
-                resolve(content);
-              });
-            });
-          })
-          .catch( err =&gt; {
-            if (err.message === &#39;Not File&#39;) {
-              return;
-            }
-            throw err;
-          })
-          .then( content =&gt; {
-            return new Promise(resolve =&gt; {
-              var lines = content.match(/.*keyword.*/g);
-              fs.writeFile(path.join(dir, file + &#39;.result&#39;),
-                          lines.join(&#39;\s&#39;), &#39;utf8&#39;, function (err) { // [5]
-                if (err) throw err;
-                resolve(file);
-              });
-            });
-          })
-          .catch( err =&gt; {
-            if (err.message === &#39;No keyword&#39;) {
-              return;
-            }
-            throw err;
-          });
         });
+      }));
+    })
+    .then( stats =&gt; {
+      let biggest = stats.reduce( (memo, stat) =&gt; {
+        if (memo.size &lt; stat.size) {
+          return stat;
+        }
+        return memo;
       });
-    });
+      return biggest.file;
+    })
+    .catch(console.log.bind(console));   
 }
 
-search(&#39;some/path/&#39;, &#39;meathill&#39;)
+search(&#39;some/path/&#39;)
   .then( files =&gt; {
     console.log(files);
   })
@@ -303,7 +303,13 @@ search(&#39;some/path/&#39;, &#39;meathill&#39;)
     console.log(err);
   });
 </code></pre>
-</section></section><section><h2 id="promise-">Promise 的支持情况</h2>
+</section></section><section><h2 id="-tips">一些 tips</h2>
+<p>这是我犯过的一些错误，希望成为大家前车之鉴。</p>
+<ul>
+<li><code>.resolve()</code> <code>.reject()</code> 不会 <code>return</code></li>
+<li>Promise 里必须 <code>.resolve()</code> <code>.reject()</code> <code>throw err</code> 才会改变状态</li>
+</ul>
+</section><section><h2 id="promise-">Promise 的支持情况</h2>
 <p><img src="./img/caniuse.jpg" title="" alt="caniuse" ></p>
 <p>放手用吧，少年！</p>
 </section><section><h2 id="q-a">Q&amp;A</h2>
