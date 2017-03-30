@@ -78,11 +78,11 @@ function findLargest(dir, callback) {
       
       if (--count === 0) {
         let largest = stats
-              .filter(function (stat) { return stat.isFile(); })
-              .reduce(function (prev, next) {
-                if (prev.size > next.size) return prev;
-                return next;
-              });
+          .filter(function (stat) { return stat.isFile(); })
+          .reduce(function (prev, next) {
+            if (prev.size > next.size) return prev;
+            return next;
+          });
         callback(null, files[stats.indexOf(largest)]);
       }
     });    
@@ -157,7 +157,10 @@ Note:
 
 ### 定时执行
 
-<!-- ./sample/timeout.js -->
+
+```
+./sample/timeout.js
+```
 
 <!-- page -->
 
@@ -165,13 +168,17 @@ Note:
 
 ### 两次定时执行
 
-<!-- ./sample/timeout2.js -->
+```
+./sample/timeout2.js
+```
 
 <!-- page -->
 
 假如在 `.then()` 的函数里面不返回新的 Promise，会怎样？
 
-<!-- ./sample/timeout3.js -->
+```
+./sample/timeout3.js
+```
 
 <!-- page -->
 
@@ -310,31 +317,67 @@ Promise 会自动捕获内部异常，并交给 `reject` 函数处理。
 
 <!-- section -->
 
-<i class="fa fa-warning"></i> 注意：强烈建议在所有队列最后都加上 `.catch()`，以避免漏掉错误处理造成意想不到的问题。
+### `.catch()` 与 `.then()` 混用
+
+```
+./sample/catch-then.js
+```
 
 <!-- section -->
 
-### `.catch()` 与 `.then()` 混用
+<i class="fa fa-warning"></i> 注意：强烈建议在所有队列最后都加上 `.catch()`，以避免漏掉错误处理造成意想不到的问题。
+
+```javascript
+doSomething()
+  .doAnotherThing()
+  .doMoreThing()
+  .catch( err => {
+    console.log(err);
+  });
+```
 
 <!-- page -->
 
 ## 把回调包装成 Promise
 
+```
+./sample/wrap.js
+```
+
 <!-- page -->
 
-## `forEach`
+## 批量执行
+
+`Promise.all()`
 
 <!-- section -->
 
-### 进阶：使用 Generator 遍历 
+`Promise.all([p1, p2, p3, ....])` 用于将多个 Promise 实例，包装成一个新的 Promise 实例。
+
+1. 它接受一个数组作为参数
+2. 数组里可以是 Promise 对象，也可以是别的值，只有 Promise 会等待状态改变
+3. 当所有子 Promise 都完成，该 Promise 完成，返回值是全部值的数组
+4. 有任何一个失败，该 Promise 失败，返回值是第一个失败的结果
+
+```
+./sample/all.js
+```
 
 <!-- page -->
 
-## `Promise.all()`
+`.map()`
+
+```
+./sample/map.js
+```
 
 <!-- page -->
 
 ## 实现队列
+
+<!-- section -->
+
+### 进阶：使用 Generator 遍历 
 
 <!-- page -->
 
@@ -374,7 +417,7 @@ $.ajax(url, {
 <!-- section -->
 
 ```javascript
-function search(dir, keyword, callback) {
+function search(dir) {
   return new Promise( resolve => {
     fs.readdir(dir, function (err, files) {
       if (err) throw err;
@@ -384,53 +427,32 @@ function search(dir, keyword, callback) {
     .then( files => {
       return Promise.all( files.map( file => {
         return new Promise(resolve => {
-          fs.stat(path.join(dir, file), function (err, stat) {
+          fs.stat(path.join(dir, file), (err, stat) => {
             if (err) throw err;
             if (stat.isDirectory()) {
-              throw new Error('Not File');
+              return resolve({
+                size: 0
+              });
             }
+            stat.file = file;
             resolve(stat);
           });
-        })
-          .then( stat => {
-            return new Promise(resolve => {
-              fs.readFile(path.join(dir, file), 'utf8', function (err, content) {
-                if (err) throw err;
-                if (content.indexOf(keyword) === -1) {
-                  throw new Error('No keyword');
-                }
-                resolve(content);
-              });
-            });
-          })
-          .catch( err => {
-            if (err.message === 'Not File') {
-              return;
-            }
-            throw err;
-          })
-          .then( content => {
-            return new Promise(resolve => {
-              var lines = content.match(/.*keyword.*/g);
-              fs.writeFile(path.join(dir, file + '.result'),
-                          lines.join('\s'), 'utf8', function (err) { // [5]
-                if (err) throw err;
-                resolve(file);
-              });
-            });
-          })
-          .catch( err => {
-            if (err.message === 'No keyword') {
-              return;
-            }
-            throw err;
-          });
         });
+      }));
+    })
+    .then( stats => {
+      let biggest = stats.reduce( (memo, stat) => {
+        if (memo.size < stat.size) {
+          return stat;
+        }
+        return memo;
       });
-    });
+      return biggest.file;
+    })
+    .catch(console.log.bind(console));   
 }
 
-search('some/path/', 'meathill')
+search('some/path/')
   .then( files => {
     console.log(files);
   })
@@ -438,6 +460,15 @@ search('some/path/', 'meathill')
     console.log(err);
   });
 ```
+
+<!-- page -->
+
+## 一些 tips
+
+这是我犯过的一些错误，希望成为大家前车之鉴。
+
+* `.resolve()` `.reject()` 不会 `return`
+* Promise 里必须 `.resolve()` `.reject()` `throw err` 才会改变状态
 
 <!-- page -->
 
