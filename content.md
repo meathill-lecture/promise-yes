@@ -20,8 +20,9 @@
 
 > 一个 Promise 表示一个现在、将来或永不可能可用的值。
 
-<!-- fragment -->
+<p class="fragment">
 ![扶额](./img/fue.jpg)
+</p>
 
 <!-- page -->
 
@@ -55,13 +56,14 @@ Note:
 
 假设需求：
 
-遍历目录，找出包含关键词的文件，将其中包含关键词的一行取出来，放在另一个文件里，并返回所有文件的文件名。
+遍历目录，找出最大的一个文件。
 
 <!-- section -->
 ```javascript
 function findLargest(dir, callback) {
   fs.readdir(dir, function (err, files) {
     if (err) return callback(err);
+    let count = files.length;
     let errored = false;
     let stats = [];
     files.forEach( file => {
@@ -73,15 +75,18 @@ function findLargest(dir, callback) {
         }
         stats.push(stat); // [3]
       });
-    });
-    let largest = stats
-      .filter(function (stat) { return stat.isFile(); })
-      .reduce(function (prev, next) {
-        if (prev.size > next.size) return prev;
-        return next;
-      });
-    callback(null, files[stats.indexOf(largest)]);
-  })
+      
+      if (--count === 0) {
+        let largest = stats
+              .filter(function (stat) { return stat.isFile(); })
+              .reduce(function (prev, next) {
+                if (prev.size > next.size) return prev;
+                return next;
+              });
+        callback(null, files[stats.indexOf(largest)]);
+      }
+    });    
+  });
 }
 
 findLargest('./path/to/dir', function (err, filename) {

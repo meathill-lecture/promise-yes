@@ -1,0 +1,324 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Promise 的 N 种用法</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <link rel="stylesheet" href="//cdn.staticfile.org/reveal.js/3.4.1/css/reveal.css">
+    <link rel="stylesheet" href="//cdn.staticfile.org/reveal.js/3.4.1/css/theme/moon.css">
+    <link rel="stylesheet" href="//cdn.staticfile.org/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.10.0/styles/darkula.css">
+    <link href="//fonts.lug.ustc.edu.cn/css?family=Source+Code+Pro" rel="stylesheet">
+    <link rel="stylesheet" href="./css/screen.css">
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section><h1 id="promise-br-promise-">Promise? <br>Promise.</h1>
+</section><section><blockquote>
+<p>[&#39;prɒmɪs]</p>
+<p>n. 许诺，允诺；希望</p>
+</blockquote>
+</section><section><section><blockquote>
+<p>The Promise object is used for asynchronous computations.</p>
+<p>A Promise represents a value which may be available now, or in the future, or never.</p>
+<p>--<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">MDN</a></p>
+</blockquote>
+</section><section><blockquote>
+<p>Promise 对象用于异步计算。</p>
+<p>一个 Promise 表示一个现在、将来或永不可能可用的值。</p>
+</blockquote>
+<p class="fragment">
+<img src="./img/fue.jpg" title="" alt="扶额" >
+</p>
+
+</section></section><section><p>Promise 对象</p>
+<ul>
+<li>用于异步计算。</li>
+<li>它代表一个值，</li>
+<li>这个值可能现在就可以用；</li>
+<li>也可能将来才可以用（正在加载）;</li>
+<li>甚至永远不会存在（但不耽误我们写别的）。</li>
+</ul>
+</section><section><section><h2 id="-promise-">为什么会有 Promise？</h2>
+<ol>
+<li>JavaScript 为检查表单而生</li>
+<li>接下来它可以操作 DOM</li>
+<li>JS 的操作大多是异步的</li>
+<li>无阻塞成为 JS 的特色</li>
+</ol>
+</section><section><p>稍有不慎，就会踏入“回调地狱”。</p>
+<p><img src="./img/callback-hell.jpg" title="" alt="callback hell" ></p>
+</section></section><section><section><p>假设需求：</p>
+<p>遍历目录，找出最大的一个文件。</p>
+</section><section><pre><code class="lang-javascript">function findLargest(dir, callback) {
+  fs.readdir(dir, function (err, files) {
+    if (err) return callback(err);
+    let count = files.length;
+    let errored = false;
+    let stats = [];
+    files.forEach( file =&gt; {
+      fs.stat(path.join(dir, file), (err, stat) =&gt; { // [1]
+        if (errored) return; // [2]
+        if (err) {
+          errored = true;
+          return callback(err);
+        }
+        stats.push(stat); // [3]
+      });
+
+      if (--count === 0) {
+        let largest = stats
+              .filter(function (stat) { return stat.isFile(); })
+              .reduce(function (prev, next) {
+                if (prev.size &gt; next.size) return prev;
+                return next;
+              });
+        callback(null, files[stats.indexOf(largest)]);
+      }
+    });    
+  });
+}
+
+findLargest(&#39;./path/to/dir&#39;, function (err, filename) {
+  if (err) return console.error(err);
+  console.log(&#39;largest file was:&#39;, filename);
+});
+</code></pre>
+</section></section><section><p>回调有三个问题：</p>
+<ol>
+<li>嵌套层次很深，难以维护</li>
+<li>无法正常使用 <code>return</code> 和 <code>throw</code></li>
+<li>无法正常检索堆栈信息</li>
+</ol>
+</section><section><p>社区经过长时间探索，最终总结出：</p>
+<h2 id="promise">Promise</h2>
+<ol>
+<li>可以很好的解决回调嵌套问题</li>
+<li>代码阅读体验很好</li>
+<li>不需要增加新的语法</li>
+</ol>
+</section><section><section><h2 id="promise-">Promise 详解</h2>
+</section><section><pre><code class="lang-javascript">new Promise(
+  function (resolve, reject) {
+    // 一段耗时很长的异步操作
+    // 数据处理完成
+    resolve();
+
+    // 数据处理出错
+    reject();
+  }
+)
+  .then( function () {
+    // 成功，下一步
+  }, function () {
+    // 失败，做相应处理
+  });
+</code></pre>
+</section><section><ol>
+<li>Promise 是一个 <strong>代理对象</strong>，它和原先的操作并无关系。</li>
+<li>Promise 有3个状态：<ol>
+<li><code>pending</code> [待定] 初始状态</li>
+<li><code>fulfilled</code> [实现] 操作成功</li>
+<li><code>rejected</code> [被否决] 操作失败</li>
+</ol>
+</li>
+<li>Promise 一经创建，立即执行。</li>
+<li>Promise 状态发生改变的时候，就会执行 <code>.then()</code> 里的回调。</li>
+<li>Promise 的状态一经改变，不会再变。</li>
+</ol>
+</section><section><p>接下来，看一个简单的范例</p>
+<h3 id="-">定时执行</h3>
+<!-- ./sample/timeout.js -->
+</section></section><section><p>再看一个两步执行完的范例</p>
+<h3 id="-">两次定时执行</h3>
+<!-- ./sample/timeout2.js -->
+</section><section><p>假如在 <code>.then()</code> 的函数里面不返回新的 Promise，会怎样？</p>
+<!-- ./sample/timeout3.js -->
+</section><section><h2 id="-then-"><code>.then()</code></h2>
+<ol>
+<li><code>.then()</code>接受一个或两个函数作为参数</li>
+<li>当前面的 Promise 状态改变时，根据最终状态，选择执行</li>
+<li><code>fulfilled</code> 函数可以返回新的 Promise，或其它值</li>
+<li>如果返回新的 Promise，那么下一级 <code>.then()</code> 会在其完成之后执行</li>
+<li>如果返回其它任何值，则会继续执行下一级 <code>.then()</code></li>
+</ol>
+</section><section><p>问题：下面的四种 promises 的区别是什么</p>
+<pre><code class="lang-javascript">// #1
+doSomething().then(function () {
+  return doSomethingElse();
+});
+
+// #2
+doSomething().then(function () {
+  doSomethingElse();
+});
+
+// #3
+doSomething().then(doSomethingElse());
+
+// #4
+doSomething().then(doSomethingElse);
+</code></pre>
+</section><section><section><pre><code class="lang-javascript">doSomething()
+  .then(function () {
+    return doSomethingElse();
+  });
+</code></pre>
+<p>答案：</p>
+<pre><code>doSomething
+|-----------|
+            doSomethingElse(undefined)
+            |------------|
+                         finalHandler(resultOfDoSomethingElse)
+                         |------------|
+</code></pre></section><section><pre><code class="lang-javascript">doSomething()
+  .then(function () {
+    doSomethingElse();
+  })
+  .then(finalHandler);
+</code></pre>
+<p>答案：</p>
+<pre><code>doSomething
+|-----------------|
+                  doSomethingElse(undefined)
+                  |------------------|
+                  finalHandler(undefined)
+                  |------------------|
+</code></pre></section><section><pre><code class="lang-javascript">doSomething()
+  .then(doSomethingElse())
+  .then(finalHandler);
+</code></pre>
+<p>答案：</p>
+<pre><code>doSomething
+|-----------------|
+doSomethingElse(undefined)
+|---------------------------------|
+                  finalHandler(resultOfDoSomething)
+                  |------------------|
+</code></pre></section><section><pre><code class="lang-javascript">doSomething()
+  .then(doSomethingElse)
+  .then(finalHandler);
+</code></pre>
+<p>答案：</p>
+<pre><code>doSomething
+|-----------|
+            doSomethingElse(resultOfDoSomething)
+            |------------|
+                         finalHandler(resultOfDoSomethingElse)
+                         |------------------|
+</code></pre></section><section><p>注：以上4道题及答案均来自 <a href="https://pouchdb.com/2015/05/18/we-have-a-problem-with-promises.html">We have a problem with promises</a></p>
+</section></section><section><section><h2 id="-">错误处理</h2>
+<!-- ./sample/error.js -->
+<!-- ./sample/error-reject.js -->
+</section><section><p>Promise 会自动捕获内部异常，并交给 <code>reject</code> 函数处理。</p>
+<p>我们通常有两种做法：</p>
+<ol>
+<li><code>reject(&#39;错误信息&#39;)</code><br><code>.then(null, message =&gt; {})</code></li>
+<li><code>throw new Error(&#39;错误信息&#39;)</code><br><code>.catch( message =&gt; {})</code></li>
+</ol>
+<p>我推荐使用第二种，更加清晰，更加好读，并且可以捕获前面的错误。</p>
+</section><section><p><i class="fa fa-warning"></i> 注意：强烈建议在所有队列最后都加上 <code>.catch()</code>，以避免漏掉错误处理造成意想不到的问题。</p>
+</section><section><h3 id="-catch-then-"><code>.catch()</code> 与 <code>.then()</code> 混用</h3>
+</section></section><section><h2 id="-promise">把回调包装成 Promise</h2>
+</section><section><section><h2 id="-foreach-"><code>forEach</code></h2>
+</section><section><h3 id="-generator-">进阶：使用 Generator 遍历</h3>
+</section></section><section><h2 id="-promise-all-"><code>Promise.all()</code></h2>
+</section><section><h2 id="-">实现队列</h2>
+</section><section><section><h2 id="-promise-resolve-"><code>Promise.resolve()</code></h2>
+</section><section><h2 id="-promise-reject-"><code>Promise.reject()</code></h2>
+</section></section><section><h2 id="-promise-race-"><code>Promise.race()</code></h2>
+</section><section><section><h2 id="jquery">jQuery</h2>
+<p>jQuery 已经实现了 Promise。参见 <a href="http://api.jquery.com/jQuery.ajax/#jqXHR">jqXHR</a></p>
+<pre><code class="lang-javascript">$.ajax(url, {
+  dataType: &#39;json&#39;
+})
+  .then(json =&gt; {
+    // 该干啥干啥
+  });
+</code></pre>
+</section><section><h3 id="jquery-defered">jQuery.defered</h3>
+</section></section><section><section><p>我们来用 Promise 改造一下前面的例子。</p>
+</section><section><pre><code class="lang-javascript">function search(dir, keyword, callback) {
+  return new Promise( resolve =&gt; {
+    fs.readdir(dir, function (err, files) {
+      if (err) throw err;
+      resolve(files);
+    })
+  })
+    .then( files =&gt; {
+      return Promise.all( files.map( file =&gt; {
+        return new Promise(resolve =&gt; {
+          fs.stat(path.join(dir, file), function (err, stat) {
+            if (err) throw err;
+            if (stat.isDirectory()) {
+              throw new Error(&#39;Not File&#39;);
+            }
+            resolve(stat);
+          });
+        })
+          .then( stat =&gt; {
+            return new Promise(resolve =&gt; {
+              fs.readFile(path.join(dir, file), &#39;utf8&#39;, function (err, content) {
+                if (err) throw err;
+                if (content.indexOf(keyword) === -1) {
+                  throw new Error(&#39;No keyword&#39;);
+                }
+                resolve(content);
+              });
+            });
+          })
+          .catch( err =&gt; {
+            if (err.message === &#39;Not File&#39;) {
+              return;
+            }
+            throw err;
+          })
+          .then( content =&gt; {
+            return new Promise(resolve =&gt; {
+              var lines = content.match(/.*keyword.*/g);
+              fs.writeFile(path.join(dir, file + &#39;.result&#39;),
+                          lines.join(&#39;\s&#39;), &#39;utf8&#39;, function (err) { // [5]
+                if (err) throw err;
+                resolve(file);
+              });
+            });
+          })
+          .catch( err =&gt; {
+            if (err.message === &#39;No keyword&#39;) {
+              return;
+            }
+            throw err;
+          });
+        });
+      });
+    });
+}
+
+search(&#39;some/path/&#39;, &#39;meathill&#39;)
+  .then( files =&gt; {
+    console.log(files);
+  })
+  .catch( err =&gt; {
+    console.log(err);
+  });
+</code></pre>
+</section></section><section><h2 id="promise-">Promise 的支持情况</h2>
+<p><img src="./img/caniuse.jpg" title="" alt="caniuse" ></p>
+<p>放手用吧，少年！</p>
+</section><section><h2 id="q-a">Q&amp;A</h2>
+</section><section><h4 id="-">参考：</h4>
+<ul>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">MDN</a></li>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise">MDN 中文</a></li>
+<li><a href="http://es6.ruanyifeng.com/#docs/promise">阮一峰：ECMAScript 6 入门 - Promise 对象</a></li>
+<li><a href="http://fex.baidu.com/blog/2015/07/we-have-a-problem-with-promises/">[翻译] We have a problem with promises</a></li>
+</ul>
+</section>
+      </div>
+    </div>
+    <script src="//cdn.staticfile.org/reveal.js/3.4.1/lib/js/head.min.js"></script>
+    <script src="//cdn.staticfile.org/reveal.js/3.4.1/js/reveal.js"></script>
+    <script src="./app/main.js"></script>
+  </body>
+</html>

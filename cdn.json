@@ -1,0 +1,8 @@
+{
+  "bootstrap": "//cdn.staticfile.org/twitter-bootstrap/4.0.0-alpha.6/",
+  "jquery": "//cdn.staticfile.org/jquery/3.2.1/",
+  "font-awesome": "//cdn.staticfile.org/font-awesome/4.7.0/",
+  "marked": "//cdn.staticfile.org/marked/0.3.6/",
+  "reveal.js": "//cdn.staticfile.org/reveal.js/3.4.1/",
+  "highlight.js": "//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.10.0/"
+}

@@ -23,8 +23,17 @@
   },
   "homepage": "https://meathill-lecture.github.io/promise-yes/",
   "devDependencies": {
+    "del": "^2.2.2",
     "font-awesome": "^4.7.0",
+    "gulp": "^3.9.1",
+    "gulp-clean-css": "^3.0.4",
+    "gulp-rename": "^1.2.2",
+    "gulp-replace": "^0.5.4",
+    "gulp-stylus": "^2.6.0",
+    "gulp-uglify": "^2.1.2",
     "highlight.js": "^9.10.0",
-    "reveal.js": "^3.4.1"
+    "marked": "^0.3.6",
+    "reveal.js": "^3.4.1",
+    "run-sequence": "^1.2.2"
   }
 }
