@@ -3,9 +3,9 @@
  * Created by Meathill on 2017/3/30.
  */
 
-const FileReader = require('./FileReader');
+const fs = require('./FileSystem');
 
-FileReader.read('../README.md', 'utf-8')
+fs.readFile('../README.md', 'utf-8')
   .then(content => {
     console.log(content);
   });

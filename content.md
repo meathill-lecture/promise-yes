@@ -28,7 +28,7 @@
 
 <!-- page -->
 
-Promise 对象
+### Promise 对象
 
 * 用于异步计算。
 * 代表一个值，
@@ -36,21 +36,42 @@ Promise 对象
 * 也可能将来才可以用;
 * 甚至永远不会存在。
 
+<p class="fragment fue">
+![扶额](./img/fue.jpg)
+</p>
+
 Note:
 4. （正在加载）
 5. （但不耽误我们写别的）
+
+<!-- section -->
+
+## Promise 对象
+
+* 主要用于异步计算。
+* 可以帮将异步操作队列化，按照期望的顺序执行，返回符合预期的结果。
+* 可以在对象之间传递和操作 Promise。
 
 <!-- page -->
 
 ## 为什么会有 Promise？
 
-1. JavaScript 为检查表单而生
-2. 创造它的首要目标是操作 DOM
-3. JS 的操作大多是异步的
-4. 无阻塞成为 JS 的特色
+1. JavaScript 为检查表单而生。
+2. 创造它的首要目标是操作 DOM。
+3. 所以，JavaScript 的操作大多是异步的。
 
 Note:
 3. (作为一门 UI 语言，界面冻结是大忌)
+
+<!-- section -->
+
+### 有了 Node.js 之后
+
+情况进一步加剧了……
+
+1. 无阻塞高并发，是 Node.js 的招牌。
+2. 异步操作是其保障。
+3. 大量操作依赖回调函数。
 
 <!-- section -->
 
@@ -127,18 +148,18 @@ findLargest('./path/to/dir', function (err, filename) {
 
 ```javascript
 new Promise(
+  /* 执行器 executor */
   function (resolve, reject) {
     // 一段耗时很长的异步操作
-    // 数据处理完成
-    resolve();
+    
+    resolve(); // 数据处理完成
 
-    // 数据处理出错
-    reject();
+    reject(); // 数据处理出错
   }
 )
-  .then(function () {
+  .then(function A() { 
     // 成功，下一步
-  }, function () {
+  }, function B() {
     // 失败，做相应处理
   });
 ```
@@ -153,16 +174,15 @@ Note:
     1. `pending` [待定] 初始状态
     2. `fulfilled` [实现] 操作成功
     3. `rejected` [被否决] 操作失败
-3. Promise 实例一经创建，立即执行。
-4. Promise 状态发生改变的时候，就会触发 `.then()` 执行后续步骤。
+3. Promise 实例一经创建，执行器立即执行。
+4. Promise 状态发生改变 ，就会触发 `.then()` 执行后续步骤。
 5. Promise 的状态一经改变，不会再变。
 
-<!-- section -->
+<!-- page -->
 
 接下来，看一个简单的范例
 
 ### 定时执行
-
 
 ```
 ./sample/timeout.js
@@ -170,9 +190,9 @@ Note:
 
 <!-- page -->
 
-再看一个分两步执行的范例
+再看一个
 
-### 两次定时执行
+### 分两次，顺序依次执行
 
 ```
 ./sample/timeout2.js
@@ -190,14 +210,24 @@ Note:
 
 ## `.then()`
 
-1. `.then()`接受两个函数作为参数，分别代表 `fulfilled` 和 `rejected`
-2. 当前面的 Promise 状态改变时，根据其最终状态，选择一个来执行
+1. `.then()` 接受两个函数作为参数，分别代表 `fulfilled` 和 `rejected`
+2. `.then()` 返回一个新的 Promise 实例，所以它可以链式调用
+2. 当前面的 Promise 状态改变时，`.then()` 根据其最终状态，选择特定的状态响应函数执行
 3. 状态响应函数可以返回新的 Promise，或其它值
 4. 如果返回新的 Promise，那么下一级 `.then()` 会在新 Promise 状态改变之后执行
-5. 如果返回其它任何值，则会立刻继续执行下一级 `.then()`
+5. 如果返回其它任何值，则会立刻执行下一级 `.then()`
 
-Note:
-1. (我建议只传一个，错误处理用 `.catch()`)
+<!-- page -->
+
+### `.then()` 里有 `.then()` 的情况
+
+会等里面的 `.then()` 执行完，在执行外面的。
+
+对于我们来说，此时最好将其展开，会更好读。
+
+```
+./sample/nested-then.js
+```
 
 <!-- page -->
 
@@ -323,7 +353,9 @@ Promise 会自动捕获内部异常，并交给 `reject` 函数处理。
 
 <!-- section -->
 
-### `.catch()` 与 `.then()` 混用
+来看一个捕获错误的范例：
+
+### 使用 `.catch()`
 
 ```
 ./sample/catch-then.js
@@ -345,6 +377,13 @@ doSomething()
 <!-- page -->
 
 ## 把回调包装成 Promise
+
+把回调包装城 Promise 是最常见的应用。
+
+它有两个显而易见好处：
+
+1. 可读性更好
+2. 返回的结果可以加入任何 Promise 队列
 
 ```
 ./sample/wrap.js
@@ -371,7 +410,9 @@ doSomething()
 
 <!-- page -->
 
-`.map()`
+`Promise.all()` 最常见就是和 `.map()` 连用。
+
+我们改造一下前面的例子。
 
 ```
 ./sample/map.js
@@ -381,17 +422,174 @@ doSomething()
 
 ## 实现队列
 
+有时候我们不希望所有动作一起发生，而是按照一定顺序，逐个进行。
+
+```javascript
+let promise = doSomething();
+promise = promise.then(doSomethingElse);
+promise = promise.then(doSomethingElse2);
+promise = promise.then(doSomethingElse3);
+....
+```
+
 <!-- section -->
 
-### 进阶：使用 Generator 遍历 
+### 使用 `.forEach()`
+
+```javascript
+function queue(things) {
+  let promise = Promise.resolve();
+  things.forEach( thing => {
+    promise = promise.then( () => {
+      return new Promise( resolve => {
+        doThing(thing, () => {
+          resolve();
+        });
+      });
+    });
+  });
+  return promise;
+}
+
+queue(['lots', 'of', 'things', ....]);
+```
+<!-- section -->
+
+### 使用 `.reduce()`
+
+```javascript
+function queue(things) {
+  return things.reduce( (promise, thing) => {
+    return promise.then( () => {
+      return new Promise( resolve => {
+        doThing(thing, () => {
+          resolve();
+        });
+      });
+    });
+  }, Promise.resolve());
+}
+
+queue(['lots', 'of', 'things', ....]);
+```
+
+<!-- section -->
+
+注意，这里有个很常见的错误：
+
+```javascript
+function queue(things) {
+  return things.reduce( (promise, thing) => {
+    let step = new Promise( resolve => {
+      doThing(thing, () => {
+        resolve();
+      });
+    });
+    return promise.then( step );
+  }, Promise.resolve());
+}
+
+queue(['lots', 'of', 'things', ....]);
+```
+
+<!-- page -->
+
+假设需求：
+
+开发一个爬虫，抓取某网站。
+
+<!-- section -->
+
+```javascript
+let url = ['http://blog.meathill.com/'];
+function fetchAll(promise, urls) {
+  urls.reduce((promise, url) => {
+    return promise.then( () => {
+      return fetch(url);
+    });
+  }, promise);
+}
+function fetch(url) {
+  return spider.fetch(url)
+    .then( content => {
+      return saveOrOther(content);
+    })
+    .then( content => {
+      let links = spider.findLinks(content);
+      let next = Promise.resolve();
+      return fetchAll(next, links);
+    });
+}
+fetchAll(Promise.resolve(), url);
+```
+
+<!-- section -->
+
+### 进阶：使用 Generator 遍历
+
+关于 Generator 的详情，请参阅[相关文档](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Generator)。
+
+简而言之，Generator 可以在执行中中断，并等待唤起。
+
+<!-- section -->
+```javascript
+let generator = function* (url) {
+  yield fetch(urls.unshift());
+};
+
+function fetch(url) {
+  spider.fetch(url)
+    .then( content => {
+      loaded.push(url);
+      return saveOrOther(content);
+    })
+    .then( content => {
+      let links = spider.findLinks(content);
+      links = _.without(links, loaded);
+      urls = urls.concat(links);
+    });
+}
+
+function fetchAll(urls) {
+  let iterator = generator();
+  let result = iterator.next();
+  while (!result.done) {
+    result = iterator.next();
+  }
+  let promise = iterator.next().value;
+  if (promise instanceof Promise) {
+    promise.then()
+  } 
+}
+
+let urls = ['http://blog.meathill.com'];
+let loaded = [];
+fetchAll(urls)
+```
+
 
 <!-- page -->
 
 ## `Promise.resolve()`
 
+1. 参数为空，返回一个状态为 `fulfilled` 的 Promise 实例
+2. 参数是一个跟 Promise 无关的值，同上，不过 `.then()` 会带这个值
+3. 参数为 Promise 实例，则返回该实例，不做任何修改
+4. 参数为 `thenable`，立刻执行它的 `.then()`
+
+```
+./sample/resolve.js
+```
+
 <!-- section -->
 
 ## `Promise.reject()`
+
+同 `Promise.resolve()`，只是完全反过来。
+
+```
+./sample/reject.js
+```
 
 <!-- section -->
 
@@ -399,7 +597,11 @@ doSomething()
 
 <!-- page -->
 
-## jQuery
+## 现实中的 Promise
+
+<!-- section -->
+
+### jQuery
 
 jQuery 已经实现了 Promise。参见 [jqXHR](http://api.jquery.com/jQuery.ajax/#jqXHR)
 
@@ -414,61 +616,42 @@ $.ajax(url, {
 
 <!-- section -->
 
-### jQuery.defered
+### Oh，IE...
+
+如果你需要在 IE 中使用 Promise，有两个选择：
+
+1. [jQuery.defered](http://api.jquery.com/category/deferred-object/)
+2. [Promise polyfill](https://github.com/stefanpenner/es6-promise)
 
 <!-- section -->
 
-### fetch API
+### Fetch API
 
-<!-- page -->
+Fetch API 是 XMLHttpRequest 的现代化替代方案，它更强大，也更友好。
 
-我们来用 Promise 改造一下前面的例子。
-
-<!-- section -->
+它直接返回一个 Promise 实例。
 
 ```javascript
-function search(dir) {
-  return new Promise( resolve => {
-    fs.readdir(dir, function (err, files) {
-      if (err) throw err;
-      resolve(files);
-    })
+fetch('some.json')
+  .then( response => {
+    return response.json();
   })
-    .then( files => {
-      return Promise.all( files.map( file => {
-        return new Promise(resolve => {
-          fs.stat(path.join(dir, file), (err, stat) => {
-            if (err) throw err;
-            if (stat.isDirectory()) {
-              return resolve({
-                size: 0
-              });
-            }
-            stat.file = file;
-            resolve(stat);
-          });
-        });
-      }));
-    })
-    .then( stats => {
-      let biggest = stats.reduce( (memo, stat) => {
-        if (memo.size < stat.size) {
-          return stat;
-        }
-        return memo;
-      });
-      return biggest.file;
-    })
-    .catch(console.log.bind(console));   
-}
-
-search('some/path/')
-  .then( files => {
-    console.log(files);
+  .then( json => {
+    // do something with the json
   })
   .catch( err => {
     console.log(err);
   });
+```
+
+<!-- page -->
+
+## async/await
+
+<!-- section -->
+
+```javascript
+
 ```
 
 <!-- page -->
@@ -500,3 +683,5 @@ search('some/path/')
 * [MDN 中文](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise)
 * [阮一峰：ECMAScript 6 入门 - Promise 对象](http://es6.ruanyifeng.com/#docs/promise)
 * [[翻译] We have a problem with promises](http://fex.baidu.com/blog/2015/07/we-have-a-problem-with-promises/)
+* [MDN Generator](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Generator)
+* [await/async](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/await)
