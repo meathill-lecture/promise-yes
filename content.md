@@ -129,6 +129,7 @@ findLargest('./path/to/dir', function (err, filename) {
 1. 嵌套层次很深，难以维护
 2. 无法正常使用 `return` 和 `throw`
 3. 无法正常检索堆栈信息
+4. 多个回调之间难以建立联系
 
 <!-- page -->
 
@@ -585,7 +586,9 @@ fetchAll(urls)
 
 ## `Promise.reject()`
 
-同 `Promise.resolve()`，只是完全反过来。
+`Promise.reject()` 会返回一个状态为 `rejected` 的 Promise 实例。
+
+`Promise.reject()` 不认 `thenable`
 
 ```
 ./sample/reject.js
@@ -594,6 +597,12 @@ fetchAll(urls)
 <!-- section -->
 
 ## `Promise.race()`
+
+`Promise.race()` 功能类似 `Promise.all()`，不过它是有一个完成就算完成。
+
+```
+./sample/race.js
+```
 
 <!-- page -->
 
@@ -643,6 +652,12 @@ fetch('some.json')
     console.log(err);
   });
 ```
+
+<!-- page -->
+
+## 回顾
+
+
 
 <!-- page -->
 
