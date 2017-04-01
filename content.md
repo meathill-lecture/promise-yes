@@ -70,18 +70,48 @@ Note:
 
 ## 为什么会有 Promise？
 
+<!-- section -->
+
+### JavaScript 包含了大量异步操作
+
 1. JavaScript 为检查表单而生。
 2. 创造它的首要目标是操作 DOM。
 3. 所以，JavaScript 的操作大多是异步的。
 
 Note:
-3. (作为一门 UI 语言，界面冻结是大忌)
+2. (作为一门 UI 语言，界面冻结是大忌)
+
+<!-- section -->
+
+#### 为什么异步操作可以避免界面冻结呢？
+
+<!-- section -->
+
+假设你去到一家饭店，自己找座坐下了，然后招呼服务员拿菜单来。
+
+服务员说："对不起，我是'**同步**'服务员，我要服务完这张桌子才能招呼你。"
+
+你是不是很想抽ta？
+
+<!-- section -->
+
+那一桌人明明已经吃上了，你只是想要菜单，这么小的一个动作，服务员却要你等到别人的一个大动作完成。
+
+这就是"同步"的问题：
+
+> 顺序交付的工作1234，必须按照1234的顺序完成。
+
+<!-- section -->
+
+异步，则是将耗时很长的 A 交付的工作交给系统之后，就去继续做 B 交付的工作。等到系统完成之后，再通过回调或者事件，继续做 A 剩下的工作。
+
+从观察者的角度，看起来 AB 工作的完成顺序，和交付他们的时间顺序无关，所以叫"异步"。
 
 <!-- section -->
 
 ### 有了 Node.js 之后
 
-情况进一步加剧了……
+对异步的依赖进一步加剧了……
 
 1. 无阻塞高并发，是 Node.js 的招牌。
 2. 异步操作是其保障。
@@ -138,12 +168,16 @@ findLargest('./path/to/dir', function (err, filename) {
 
 <!-- page -->
 
-回调有三个问题：
+回调有四个问题：
 
 1. 嵌套层次很深，难以维护
 2. 无法正常使用 `return` 和 `throw`
 3. 无法正常检索堆栈信息
 4. 多个回调之间难以建立联系
+
+<!-- page -->
+
+有没有一种方案，既能保留异步在无阻塞上的优势，又能让我们写代码写的更舒服呢？
 
 <!-- page -->
 
@@ -154,6 +188,9 @@ findLargest('./path/to/dir', function (err, filename) {
 1. 可以很好的解决回调嵌套问题
 2. 代码阅读体验很好
 3. 不需要新的语言特性
+
+Note:
+这里我可以提前剧透一下，世间本无双全法，不负如来不负卿。Promise 改善了编码体验，但还不算真正解决了回调问题。
 
 <!-- page -->
 
@@ -739,7 +776,9 @@ fetch('some.json')
 
 ## async/await
 
-这是一对新的运算符，它通过增加语法的方式，赋予 JavaScript 以顺序手法编写异步脚本的能力。
+ES2017 新增运算符，增加新的语法，赋予 JavaScript 以顺序手法编写异步脚本的能力。
+
+**注意：async/await 仍然需要 Promise！**
 
 具体的内容请参考 [MDN async 文档](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/async_function) 和 [await 文档](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/await)
 

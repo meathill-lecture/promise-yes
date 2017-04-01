@@ -58,13 +58,25 @@
 <li>可以在对象之间传递和操作 Promise。</li>
 </ul>
 </section></section><section><section><h2 id="-promise-">为什么会有 Promise？</h2>
+</section><section><h3 id="javascript-">JavaScript 包含了大量异步操作</h3>
 <ol>
 <li>JavaScript 为检查表单而生。</li>
 <li>创造它的首要目标是操作 DOM。</li>
 <li>所以，JavaScript 的操作大多是异步的。</li>
 </ol>
+</section><section><h4 id="-">为什么异步操作可以避免界面冻结呢？</h4>
+</section><section><p>假设你去到一家饭店，自己找座坐下了，然后招呼服务员拿菜单来。</p>
+<p>服务员说：&quot;对不起，我是&#39;<strong>同步</strong>&#39;服务员，我要服务完这张桌子才能招呼你。&quot;</p>
+<p>你是不是很想抽ta？</p>
+</section><section><p>那一桌人明明已经吃上了，你只是想要菜单，这么小的一个动作，服务员却要你等到别人的一个大动作完成。</p>
+<p>这就是&quot;同步&quot;的问题：</p>
+<blockquote>
+<p>顺序交付的工作1234，必须按照1234的顺序完成。</p>
+</blockquote>
+</section><section><p>异步，则是将耗时很长的 A 交付的工作交给系统之后，就去继续做 B 交付的工作。等到系统完成之后，再通过回调或者事件，继续做 A 剩下的工作。</p>
+<p>从观察者的角度，看起来 AB 工作的完成顺序，和交付他们的时间顺序无关，所以叫&quot;异步&quot;。</p>
 </section><section><h3 id="-node-js-">有了 Node.js 之后</h3>
-<p>情况进一步加剧了……</p>
+<p>对异步的依赖进一步加剧了……</p>
 <ol>
 <li>无阻塞高并发，是 Node.js 的招牌。</li>
 <li>异步操作是其保障。</li>
@@ -108,13 +120,14 @@ findLargest(&#39;./path/to/dir&#39;, function (err, filename) {
   console.log(&#39;largest file was:&#39;, filename);
 });
 </code></pre>
-</section></section><section><p>回调有三个问题：</p>
+</section></section><section><p>回调有四个问题：</p>
 <ol>
 <li>嵌套层次很深，难以维护</li>
 <li>无法正常使用 <code>return</code> 和 <code>throw</code></li>
 <li>无法正常检索堆栈信息</li>
 <li>多个回调之间难以建立联系</li>
 </ol>
+</section><section><p>有没有一种方案，既能保留异步在无阻塞上的优势，又能让我们写代码写的更舒服呢？</p>
 </section><section><p>社区经过长时间探索，最终总结出：</p>
 <h2 id="promise">Promise</h2>
 <ol>
@@ -491,7 +504,8 @@ class Confirm {
 <p>相对于传统的回调模式，Promise 有着巨大的进步，值得我们学习和使用。</p>
 </blockquote>
 </section><section><section><h2 id="async-await">async/await</h2>
-<p>这是一对新的运算符，它通过增加语法的方式，赋予 JavaScript 以顺序手法编写异步脚本的能力。</p>
+<p>ES2017 新增运算符，增加新的语法，赋予 JavaScript 以顺序手法编写异步脚本的能力。</p>
+<p><strong>注意：async/await 仍然需要 Promise！</strong></p>
 <p>具体的内容请参考 <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/async_function">MDN async 文档</a> 和 <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/await">await 文档</a></p>
 </section><section><pre><code class="lang-javascript">function resolveAfter2Seconds(x) {
   return new Promise(resolve =&gt; {
