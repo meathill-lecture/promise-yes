@@ -37,7 +37,12 @@ Promise.all([1, 2, 3])
         reject('I\'m P2');
       }, 1000);
     });
-    return Promise.all([p1, p2]);
+    let p3 = new Promise( (resolve , reject) => {
+      setTimeout(() => {
+        reject('I\'m P3');
+      }, 1600);
+    });
+    return Promise.all([p1, p2, p3]);
   })
   .then( all => {
     console.log('all', all);

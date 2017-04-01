@@ -4,6 +4,18 @@
 
 <!-- page -->
 
+### 关于作者
+
+<!-- section -->
+
+![Meathill](http://qiniu.meathill.com/wp-content/uploads/2016/07/20160607_005422423_iOS-825x510.jpg | height=400)
+
+全栈工程师，编程爱好者
+
+[博客](http://blog.meathill.com/)
+
+<!-- page -->
+
 > ['prɒmɪs]
 
 > n. 许诺，允诺；希望
@@ -49,7 +61,7 @@ Note:
 ## Promise 对象
 
 * 主要用于异步计算。
-* 可以帮将异步操作队列化，按照期望的顺序执行，返回符合预期的结果。
+* 可以帮将异步操作队列化，<br>按照期望的顺序执行，<br>返回符合预期的结果。
 * 可以在对象之间传递和操作 Promise。
 
 <!-- page -->
@@ -177,7 +189,7 @@ Note:
     3. `rejected` [被否决] 操作失败
 3. Promise 实例一经创建，执行器立即执行。
 4. Promise 状态发生改变 ，就会触发 `.then()` 执行后续步骤。
-5. Promise 的状态一经改变，不会再变。
+5. Promise 状态一经改变，不会再变。
 
 <!-- page -->
 
@@ -221,6 +233,8 @@ Note:
 <!-- page -->
 
 ### `.then()` 里有 `.then()` 的情况
+
+因为 `.then()` 返回的还是 Promise 实例。
 
 会等里面的 `.then()` 执行完，在执行外面的。
 
@@ -332,20 +346,22 @@ doSomething
 
 <!-- section -->
 
-注：以上4道题及答案均来自 [We have a problem with promises](https://pouchdb.com/2015/05/18/we-have-a-problem-with-promises.html)
+注：以上4道题及答案均来自<br> [We have a problem with promises](https://pouchdb.com/2015/05/18/we-have-a-problem-with-promises.html)
 
 <!-- page -->
 
 ## 错误处理
 
-<!-- ./sample/error.js -->
-<!-- ./sample/error-reject.js -->
+Promise 会自动捕获内部异常，并交给 `rejected` 响应函数处理。
+
+```
+./sample/error.js
+./sample/error-reject.js
+```
 
 <!-- section -->
 
-Promise 会自动捕获内部异常，并交给 `reject` 函数处理。
-
-我们通常有两种做法：
+通常有两种做法：
 
 1. `reject('错误信息')`<br>`.then(null, message => {})`
 2. `throw new Error('错误信息')`<br>`.catch( message => {})`
@@ -354,9 +370,9 @@ Promise 会自动捕获内部异常，并交给 `reject` 函数处理。
 
 <!-- section -->
 
-来看一个捕获错误的范例：
+来看一个稍微复杂一些的，捕获错误的范例：
 
-### 使用 `.catch()`
+### `.catch()` + `.then()`
 
 ```
 ./sample/catch-then.js
@@ -364,7 +380,7 @@ Promise 会自动捕获内部异常，并交给 `reject` 函数处理。
 
 <!-- section -->
 
-<i class="fa fa-warning"></i> 注意：强烈建议在所有队列最后都加上 `.catch()`，以避免漏掉错误处理造成意想不到的问题。
+> <i class="fa fa-warning"></i> 注意：强烈建议在所有队列最后都加上 `.catch()`，以避免漏掉错误处理造成意想不到的问题。
 
 ```javascript
 doSomething()
@@ -373,21 +389,6 @@ doSomething()
   .catch( err => {
     console.log(err);
   });
-```
-
-<!-- page -->
-
-## 把回调包装成 Promise
-
-把回调包装城 Promise 是最常见的应用。
-
-它有两个显而易见好处：
-
-1. 可读性更好
-2. 返回的结果可以加入任何 Promise 队列
-
-```
-./sample/wrap.js
 ```
 
 <!-- page -->
@@ -476,7 +477,25 @@ queue(['lots', 'of', 'things', ....]);
 
 <!-- section -->
 
-注意，这里有个很常见的错误：
+两个常见错误：
+
+```javascript
+....
+  things.forEach( thing => {
+    promise.then( () => {
+      return new Promise( resolve => {
+        doThing(thing, () => {
+          resolve();
+        });
+      });
+    });
+  });
+....
+```
+
+<small class="fragment">没有把 `.then()` 产生的新 Promise 实例赋给 `promise`，没有生成队列。</small>
+
+<!-- section -->
 
 ```javascript
 function queue(things) {
@@ -489,9 +508,9 @@ function queue(things) {
     return promise.then( step );
   }, Promise.resolve());
 }
-
-queue(['lots', 'of', 'things', ....]);
 ```
+
+<small class="fragment">Promise 实例创建之后，会立刻运行执行器代码，所以这个也无法达成队列的效果。</small>
 
 <!-- page -->
 
@@ -503,7 +522,8 @@ queue(['lots', 'of', 'things', ....]);
 
 ```javascript
 let url = ['http://blog.meathill.com/'];
-function fetchAll(promise, urls) {
+function fetchAll(urls) {
+  let promise = Promise.resolve();
   urls.reduce((promise, url) => {
     return promise.then( () => {
       return fetch(url);
@@ -517,11 +537,10 @@ function fetch(url) {
     })
     .then( content => {
       let links = spider.findLinks(content);
-      let next = Promise.resolve();
-      return fetchAll(next, links);
+      return fetchAll(links);
     });
 }
-fetchAll(Promise.resolve(), url);
+fetchAll(url);
 ```
 
 <!-- section -->
@@ -530,51 +549,55 @@ fetchAll(Promise.resolve(), url);
 
 关于 Generator 的详情，请参阅[相关文档](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Generator)。
 
-简而言之，Generator 可以在执行中中断，并等待唤起。
+简而言之，
+
+> Generator 可以在执行中中断，并等待唤起。
 
 <!-- section -->
 ```javascript
-let generator = function* (url) {
-  yield fetch(urls.unshift());
+let generator = function* (urls) {
+  let loaded = [];
+  while (urls.length > 0) {
+    let url = urls.unshift();
+    yield spider.fetch(url)
+      .then( content => {
+        loaded.push(url);
+        return saveOrOther(content);
+      })
+      .then( content => {
+        let links = spider.findLinks(content);
+        links = _.without(links, loaded);
+        urls = urls.concat(links);
+      });
+  }
+  return 'over';
 };
 
-function fetch(url) {
-  spider.fetch(url)
-    .then( content => {
-      loaded.push(url);
-      return saveOrOther(content);
-    })
-    .then( content => {
-      let links = spider.findLinks(content);
-      links = _.without(links, loaded);
-      urls = urls.concat(links);
-    });
-}
-
-function fetchAll(urls) {
+function fetch(urls) {
   let iterator = generator();
-  let result = iterator.next();
-  while (!result.done) {
-    result = iterator.next();
+  
+  function next() {
+    let result = iterator.next();
+    if (result.done) {
+      return result.value;
+    }
+    let promise = iterator.next().value;
+    promise.then(next);
   }
-  let promise = iterator.next().value;
-  if (promise instanceof Promise) {
-    promise.then()
-  } 
+   
+  next();
 }
 
 let urls = ['http://blog.meathill.com'];
-let loaded = [];
-fetchAll(urls)
+fetch(urls)
 ```
-
 
 <!-- page -->
 
 ## `Promise.resolve()`
 
 1. 参数为空，返回一个状态为 `fulfilled` 的 Promise 实例
-2. 参数是一个跟 Promise 无关的值，同上，不过 `.then()` 会带这个值
+2. 参数是一个跟 Promise 无关的值，同上，不过 `fulfuilled` 响应函数会得到这个参数
 3. 参数为 Promise 实例，则返回该实例，不做任何修改
 4. 参数为 `thenable`，立刻执行它的 `.then()`
 
@@ -608,7 +631,54 @@ fetchAll(urls)
 
 ## 现实中的 Promise
 
+<!-- page -->
+
+### 把回调包装成 Promise
+
+把回调包装成 Promise 是最常见的应用。
+
+它有两个显而易见好处：
+
+1. 可读性更好
+2. 返回的结果可以加入任何 Promise 队列
+
+```
+./sample/wrap.js
+```
+
+<!-- page -->
+
+### 把任何异步操作包装成 Promise
+
+假设需求：用户点击按钮，弹出确认窗体，用户确认和取消有不同的处理。
+
+且不能用 `window.confirm()`。
+
 <!-- section -->
+
+```javascript
+// 弹出窗体
+let confirm = popupManager.confirm('您确定么？');
+confirm.promise
+  .then(() => {
+    // do confirm staff
+  })
+  .catch(() => {
+    // do cancel staff
+  });
+
+// 窗体的构造函数
+class Confirm {
+  constructor() {
+    this.promise = new Promise( (resolve, reject) => {
+      this.confirmButton.onClick = resolve;
+      this.cancelBUtton.onClick = reject;
+    });
+  }
+}
+```
+
+<!-- page -->
 
 ### jQuery
 
@@ -623,16 +693,16 @@ $.ajax(url, {
   });
 ```
 
-<!-- section -->
+<!-- page -->
 
-### Oh，IE...
+### IE...
 
 如果你需要在 IE 中使用 Promise，有两个选择：
 
 1. [jQuery.defered](http://api.jquery.com/category/deferred-object/)
 2. [Promise polyfill](https://github.com/stefanpenner/es6-promise)
 
-<!-- section -->
+<!-- page -->
 
 ### Fetch API
 
@@ -655,18 +725,38 @@ fetch('some.json')
 
 <!-- page -->
 
-## 回顾
+## 回顾，总结
 
+1. Promise 可以很好的解决异步回调问题
+2. Promise 引入了不少新概念，新写法
+3. Promise 也会有嵌套，可能看起来还很复杂
 
+> 相对于传统的回调模式，Promise 有着巨大的进步，值得我们学习和使用。
 
 <!-- page -->
 
 ## async/await
 
+这是一对新的运算符，它通过增加语法的方式，赋予 JavaScript 以顺序手法编写异步脚本的能力。
+
+具体的内容请参考 [MDN async 文档](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/async_function) 和 [await 文档](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/await)
+
 <!-- section -->
 
 ```javascript
+function resolveAfter2Seconds(x) {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve(x);
+    }, 2000);
+  });
+}
 
+async function f1() {
+  var x = await resolveAfter2Seconds(10);
+  console.log(x); // 10
+}
+f1();
 ```
 
 <!-- page -->
@@ -675,14 +765,15 @@ fetch('some.json')
 
 这是我犯过的一些错误，希望成为大家前车之鉴。
 
-* `.resolve()` `.reject()` 不会 `return`
-* Promise 里必须 `.resolve()` `.reject()` `throw err` 才会改变状态
+* `.resolve()` `.reject()` 不会自动 `return`。
+* Promise 里必须 `.resolve()` `.reject()` `throw err` 才会改变状态，`.then()` 不需要。
+* `.resolve()` 只会返回一个值，返回多个值请用数组或对象。
 
 <!-- page -->
 
 ## Promise 的支持情况
 
-![caniuse](./img/caniuse.jpg)
+[![caniuse](./img/caniuse.jpg)](http://caniuse.com/#search=promise)
 
 放手用吧，少年！
 
