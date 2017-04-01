@@ -1,6 +1,6 @@
 # Promise? <br>Promise.
 
-[@meathill](https://weibo.com/meathill)
+<p class="t-a-c">[@meathill](https://weibo.com/meathill)</p>
 
 <!-- page -->
 
@@ -34,7 +34,9 @@
 
 > 一个 Promise 表示一个现在、将来或永不可能可用的值。
 
-<p class="fragment">
+> --[MDN 中文](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise)
+
+<p class="fragment fue">
 ![扶额](./img/fue.jpg)
 </p>
 
