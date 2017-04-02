@@ -187,7 +187,7 @@ findLargest('./path/to/dir', function (err, filename) {
 
 1. 可以很好的解决回调嵌套问题
 2. 代码阅读体验很好
-3. 不需要新的语言特性
+3. 不需要新的语言元素
 
 Note:
 这里我可以提前剧透一下，世间本无双全法，不负如来不负卿。Promise 改善了编码体验，但还不算真正解决了回调问题。
@@ -764,23 +764,43 @@ fetch('some.json')
 
 <!-- page -->
 
+## Promise 的支持情况
+
+[![caniuse](./img/caniuse.jpg)](http://caniuse.com/#search=promise)
+
+放手用吧，少年！
+
+<!-- page -->
+
 ## 回顾，总结
 
-1. Promise 可以很好的解决异步回调问题
-2. Promise 引入了不少新概念，新写法
-3. Promise 也会有嵌套，可能看起来还很复杂
-
 > 相对于传统的回调模式，Promise 有着巨大的进步，值得我们学习和使用。
+
+1. Promise 可以很好的解决异步回调不好写的问题
+2. Promise 可以使用队列，并且在对象之间传递
+3. Promise 不引入新语言元素，大部分浏览器已经原生支持，可以放心使用
+
+<!-- section -->
+
+### Promise 的不足
+
+1. Promise 引入了不少新概念、新写法，学习成本不低
+2. Promise 也会有嵌套，可能看起来还很复杂
+3. Promise 没有真正解决 `return/try/catch` 的问题
 
 <!-- page -->
 
 ## async/await
 
-ES2017 新增运算符，增加新的语法，赋予 JavaScript 以顺序手法编写异步脚本的能力。
+ES2017 新增运算符，增加新的语言元素，赋予 JavaScript 以顺序手法编写异步脚本的能力。
 
-**注意：async/await 仍然需要 Promise！**
+* 既能保留异步运算的无阻塞特性
+* 还能使用同步写法
+* 还能正常使用 `return/try/catch`。
 
-具体的内容请参考 [MDN async 文档](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/async_function) 和 [await 文档](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/await)
+<!-- section -->
+
+### async/await 仍然需要 Promise！
 
 <!-- section -->
 
@@ -800,6 +820,8 @@ async function f1() {
 f1();
 ```
 
+具体的内容请参考 [MDN async 文档](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/async_function) 和 [await 文档](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/await)
+
 <!-- page -->
 
 ## 一些 tips
@@ -809,14 +831,6 @@ f1();
 * `.resolve()` `.reject()` 不会自动 `return`。
 * Promise 里必须 `.resolve()` `.reject()` `throw err` 才会改变状态，`.then()` 不需要。
 * `.resolve()` 只会返回一个值，返回多个值请用数组或对象。
-
-<!-- page -->
-
-## Promise 的支持情况
-
-[![caniuse](./img/caniuse.jpg)](http://caniuse.com/#search=promise)
-
-放手用吧，少年！
 
 <!-- page -->
 

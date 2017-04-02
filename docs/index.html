@@ -133,7 +133,7 @@ findLargest(&#39;./path/to/dir&#39;, function (err, filename) {
 <ol>
 <li>可以很好的解决回调嵌套问题</li>
 <li>代码阅读体验很好</li>
-<li>不需要新的语言特性</li>
+<li>不需要新的语言元素</li>
 </ol>
 </section><section><section><h2 id="promise-">Promise 详解</h2>
 </section><section><pre><code class="lang-javascript">new Promise(
@@ -494,19 +494,32 @@ class Confirm {
     console.log(err);
   });
 </code></pre>
-</section><section><h2 id="-">回顾，总结</h2>
-<ol>
-<li>Promise 可以很好的解决异步回调问题</li>
-<li>Promise 引入了不少新概念，新写法</li>
-<li>Promise 也会有嵌套，可能看起来还很复杂</li>
-</ol>
+</section><section><h2 id="promise-">Promise 的支持情况</h2>
+<p><a href="http://caniuse.com/#search=promise"><img src="./img/caniuse.jpg" title="" alt="caniuse" ></a></p>
+<p>放手用吧，少年！</p>
+</section><section><section><h2 id="-">回顾，总结</h2>
 <blockquote>
 <p>相对于传统的回调模式，Promise 有着巨大的进步，值得我们学习和使用。</p>
 </blockquote>
-</section><section><section><h2 id="async-await">async/await</h2>
-<p>ES2017 新增运算符，增加新的语法，赋予 JavaScript 以顺序手法编写异步脚本的能力。</p>
-<p><strong>注意：async/await 仍然需要 Promise！</strong></p>
-<p>具体的内容请参考 <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/async_function">MDN async 文档</a> 和 <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/await">await 文档</a></p>
+<ol>
+<li>Promise 可以很好的解决异步回调不好写的问题</li>
+<li>Promise 可以使用队列，并且在对象之间传递</li>
+<li>Promise 不引入新语言元素，大部分浏览器已经原生支持，可以放心使用</li>
+</ol>
+</section><section><h3 id="promise-">Promise 的不足</h3>
+<ol>
+<li>Promise 引入了不少新概念、新写法，学习成本不低</li>
+<li>Promise 也会有嵌套，可能看起来还很复杂</li>
+<li>Promise 没有真正解决 <code>return/try/catch</code> 的问题</li>
+</ol>
+</section></section><section><section><h2 id="async-await">async/await</h2>
+<p>ES2017 新增运算符，增加新的语言元素，赋予 JavaScript 以顺序手法编写异步脚本的能力。</p>
+<ul>
+<li>既能保留异步运算的无阻塞特性</li>
+<li>还能使用同步写法</li>
+<li>还能正常使用 <code>return/try/catch</code>。</li>
+</ul>
+</section><section><h3 id="async-await-promise-">async/await 仍然需要 Promise！</h3>
 </section><section><pre><code class="lang-javascript">function resolveAfter2Seconds(x) {
   return new Promise(resolve =&gt; {
     setTimeout(() =&gt; {
@@ -521,6 +534,7 @@ async function f1() {
 }
 f1();
 </code></pre>
+<p>具体的内容请参考 <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/async_function">MDN async 文档</a> 和 <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/await">await 文档</a></p>
 </section></section><section><h2 id="-tips">一些 tips</h2>
 <p>这是我犯过的一些错误，希望成为大家前车之鉴。</p>
 <ul>
@@ -528,9 +542,6 @@ f1();
 <li>Promise 里必须 <code>.resolve()</code> <code>.reject()</code> <code>throw err</code> 才会改变状态，<code>.then()</code> 不需要。</li>
 <li><code>.resolve()</code> 只会返回一个值，返回多个值请用数组或对象。</li>
 </ul>
-</section><section><h2 id="promise-">Promise 的支持情况</h2>
-<p><a href="http://caniuse.com/#search=promise"><img src="./img/caniuse.jpg" title="" alt="caniuse" ></a></p>
-<p>放手用吧，少年！</p>
 </section><section><h2 id="q-a">Q&amp;A</h2>
 </section><section><h4 id="-">参考：</h4>
 <ul>
