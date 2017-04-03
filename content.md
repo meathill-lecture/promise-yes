@@ -252,6 +252,14 @@ Note:
 
 <!-- page -->
 
+假如一个 Promise 已经完成了，再 `.then()` 会怎样？
+
+```
+./sample/fulfilled-then.js
+```
+
+<!-- page -->
+
 假如在 `.then()` 的函数里面不返回新的 Promise，会怎样？
 
 ```

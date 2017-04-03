@@ -170,6 +170,8 @@ findLargest(&#39;./path/to/dir&#39;, function (err, filename) {
 </code></pre></section><section><p>再看一个</p>
 <h3 id="-">分两次，顺序依次执行</h3>
 <pre><code>./sample/timeout2.js
+</code></pre></section><section><p>假如一个 Promise 已经完成了，再 <code>.then()</code> 会怎样？</p>
+<pre><code>./sample/fulfilled-then.js
 </code></pre></section><section><p>假如在 <code>.then()</code> 的函数里面不返回新的 Promise，会怎样？</p>
 <pre><code>./sample/timeout3.js
 </code></pre></section><section><h2 id="-then-"><code>.then()</code></h2>
