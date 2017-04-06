@@ -138,8 +138,8 @@ function findLargest(dir, callback) {
     let errored = false;
     let stats = [];
     files.forEach( file => {
-      if (errored) return; // [2]
       fs.stat(path.join(dir, file), (err, stat) => {
+        if (errored) return; // [2]
         if (err) {
           errored = true;
           return callback(err);
@@ -571,7 +571,7 @@ function queue(things) {
 let url = ['http://blog.meathill.com/'];
 function fetchAll(urls) {
   let promise = Promise.resolve();
-  urls.reduce((promise, url) => {
+  return urls.reduce((promise, url) => {
     return promise.then( () => {
       return fetch(url);
     });
@@ -636,7 +636,7 @@ function fetch(urls) {
 }
 
 let urls = ['http://blog.meathill.com'];
-fetch(urls)
+fetch(urls);
 ```
 
 <!-- page -->

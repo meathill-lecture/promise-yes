@@ -93,8 +93,8 @@
     let errored = false;
     let stats = [];
     files.forEach( file =&gt; {
-      if (errored) return; // [2]
       fs.stat(path.join(dir, file), (err, stat) =&gt; {
+        if (errored) return; // [2]
         if (err) {
           errored = true;
           return callback(err);
@@ -360,7 +360,7 @@ queue([&#39;lots&#39;, &#39;of&#39;, &#39;things&#39;, ....]);
 </section><section><pre><code class="lang-javascript">let url = [&#39;http://blog.meathill.com/&#39;];
 function fetchAll(urls) {
   let promise = Promise.resolve();
-  urls.reduce((promise, url) =&gt; {
+  return urls.reduce((promise, url) =&gt; {
     return promise.then( () =&gt; {
       return fetch(url);
     });
@@ -418,7 +418,7 @@ function fetch(urls) {
 }
 
 let urls = [&#39;http://blog.meathill.com&#39;];
-fetch(urls)
+fetch(urls);
 </code></pre>
 </section></section><section><section><h2 id="-promise-resolve-"><code>Promise.resolve()</code></h2>
 <ol>
