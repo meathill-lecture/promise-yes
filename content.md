@@ -109,6 +109,14 @@ Note:
 
 <!-- section -->
 
+### 浏览器中的 JavaScript
+
+1. 异步操作以事件为主
+2. 回调主要出现在 Ajax 和 File API
+3. 这个时候问题尚不算严重
+
+<!-- section -->
+
 ### 有了 Node.js 之后
 
 对异步的依赖进一步加剧了……
@@ -227,7 +235,7 @@ Note:
     2. `fulfilled` [实现] 操作成功
     3. `rejected` [被否决] 操作失败
 3. Promise 实例一经创建，执行器立即执行。
-4. Promise 状态发生改变 ，就会触发 `.then()` 执行后续步骤。
+4. Promise 状态发生改变，就会触发 `.then()` 执行后续步骤。
 5. Promise 状态一经改变，不会再变。
 
 <!-- page -->
