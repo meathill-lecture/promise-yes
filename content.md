@@ -76,7 +76,7 @@ Note:
 
 1. JavaScript 为检查表单而生。
 2. 创造它的首要目标是操作 DOM。
-3. 所以，JavaScript 的操作大多是异步的。
+3. 所以，JavaScript 会有异步操作。
 
 Note:
 2. (作为一门 UI 语言，界面冻结是大忌)
@@ -327,7 +327,8 @@ doSomething().then(doSomethingElse);
 doSomething()
   .then(function () {
     return doSomethingElse();
-  });
+  })
+  .then(finalHandler);
 ```
 
 答案：
@@ -578,12 +579,11 @@ function queue(things) {
 ```javascript
 let url = ['http://blog.meathill.com/'];
 function fetchAll(urls) {
-  let promise = Promise.resolve();
   return urls.reduce((promise, url) => {
     return promise.then( () => {
       return fetch(url);
     });
-  }, promise);
+  }, Promise.resolve());
 }
 function fetch(url) {
   return spider.fetch(url)
@@ -692,7 +692,7 @@ fetch(urls);
 
 把回调包装成 Promise 是最常见的应用。
 
-它有两个显而易见好处：
+它有两个显而易见的好处：
 
 1. 可读性更好
 2. 返回的结果可以加入任何 Promise 队列
@@ -707,7 +707,7 @@ fetch(urls);
 
 假设需求：用户点击按钮，弹出确认窗体，用户确认和取消有不同的处理。
 
-且不能用 `window.confirm()`。
+样式问题，不能使用 `window.confirm()`。
 
 <!-- section -->
 

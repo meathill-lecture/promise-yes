@@ -8,7 +8,7 @@ Promise.all([1, 2, 3])
   .then( all => {
     console.log('1: ', all);
     return Promise.all([ function () {
-      console.log('xxoo');
+      console.log('ooxx');
     }, 'xxoo', false]);
   })
   .then( all => {
@@ -40,7 +40,7 @@ Promise.all([1, 2, 3])
     let p3 = new Promise( (resolve , reject) => {
       setTimeout(() => {
         reject('I\'m P3');
-      }, 1600);
+      }, 3000);
     });
     return Promise.all([p1, p2, p3]);
   })

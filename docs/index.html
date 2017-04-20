@@ -62,7 +62,7 @@
 <ol>
 <li>JavaScript 为检查表单而生。</li>
 <li>创造它的首要目标是操作 DOM。</li>
-<li>所以，JavaScript 的操作大多是异步的。</li>
+<li>所以，JavaScript 会有异步操作。</li>
 </ol>
 </section><section><h4 id="-">为什么异步操作可以避免界面冻结呢？</h4>
 </section><section><p>假设你去到一家饭店，自己找座坐下了，然后招呼服务员拿菜单来。</p>
@@ -75,6 +75,12 @@
 </blockquote>
 </section><section><p>异步，则是将耗时很长的 A 交付的工作交给系统之后，就去继续做 B 交付的工作。等到系统完成之后，再通过回调或者事件，继续做 A 剩下的工作。</p>
 <p>从观察者的角度，看起来 AB 工作的完成顺序，和交付他们的时间顺序无关，所以叫&quot;异步&quot;。</p>
+</section><section><h3 id="-javascript">浏览器中的 JavaScript</h3>
+<ol>
+<li>异步操作以事件为主</li>
+<li>回调主要出现在 Ajax 和 File API</li>
+<li>这个时候问题尚不算严重</li>
+</ol>
 </section><section><h3 id="-node-js-">有了 Node.js 之后</h3>
 <p>对异步的依赖进一步加剧了……</p>
 <ol>
@@ -161,7 +167,7 @@ findLargest(&#39;./path/to/dir&#39;, function (err, filename) {
 </ol>
 </li>
 <li>Promise 实例一经创建，执行器立即执行。</li>
-<li>Promise 状态发生改变 ，就会触发 <code>.then()</code> 执行后续步骤。</li>
+<li>Promise 状态发生改变，就会触发 <code>.then()</code> 执行后续步骤。</li>
 <li>Promise 状态一经改变，不会再变。</li>
 </ol>
 </section></section><section><p>接下来，看一个简单的范例</p>
@@ -208,7 +214,8 @@ doSomething().then(doSomethingElse);
 </section><section><section><pre><code class="lang-javascript">doSomething()
   .then(function () {
     return doSomethingElse();
-  });
+  })
+  .then(finalHandler);
 </code></pre>
 <p>答案：</p>
 <pre><code>doSomething
@@ -359,12 +366,11 @@ queue([&#39;lots&#39;, &#39;of&#39;, &#39;things&#39;, ....]);
 <p>开发一个爬虫，抓取某网站。</p>
 </section><section><pre><code class="lang-javascript">let url = [&#39;http://blog.meathill.com/&#39;];
 function fetchAll(urls) {
-  let promise = Promise.resolve();
   return urls.reduce((promise, url) =&gt; {
     return promise.then( () =&gt; {
       return fetch(url);
     });
-  }, promise);
+  }, Promise.resolve());
 }
 function fetch(url) {
   return spider.fetch(url)
@@ -438,7 +444,7 @@ fetch(urls);
 </code></pre></section></section><section><h2 id="-promise">现实中的 Promise</h2>
 </section><section><h3 id="-promise">把回调包装成 Promise</h3>
 <p>把回调包装成 Promise 是最常见的应用。</p>
-<p>它有两个显而易见好处：</p>
+<p>它有两个显而易见的好处：</p>
 <ol>
 <li>可读性更好</li>
 <li>返回的结果可以加入任何 Promise 队列</li>
@@ -446,7 +452,7 @@ fetch(urls);
 <pre><code>./sample/wrap.js
 </code></pre></section><section><section><h3 id="-promise">把任何异步操作包装成 Promise</h3>
 <p>假设需求：用户点击按钮，弹出确认窗体，用户确认和取消有不同的处理。</p>
-<p>且不能用 <code>window.confirm()</code>。</p>
+<p>样式问题，不能使用 <code>window.confirm()</code>。</p>
 </section><section><pre><code class="lang-javascript">// 弹出窗体
 let confirm = popupManager.confirm(&#39;您确定么？&#39;);
 confirm.promise
